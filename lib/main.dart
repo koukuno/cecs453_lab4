@@ -14,9 +14,7 @@ class MortgageApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Mortgage App',
-      theme: ThemeData(
-        colorScheme: .fromSeed(seedColor: Colors.pinkAccent, brightness: Brightness.dark),
-      ),
+      theme: ThemeData(colorScheme: .fromSeed(seedColor: Colors.pinkAccent, brightness: Brightness.dark)),
       home: const MortgageHomePage(),
     );
   }
@@ -27,6 +25,38 @@ class MortgageHomePage extends StatefulWidget {
 
   @override
   State<MortgageHomePage> createState() => _MortgagePageState();
+}
+
+class MortgageForm extends StatefulWidget {
+  const MortgageForm({super.key});
+
+  @override
+  State<MortgageForm> createState() => _MortgageFormState();
+}
+
+class _MortgageFormState extends State<MortgageForm> {
+  final _textControllerAmount = TextEditingController();
+
+  @override
+  void dispose()
+  {
+    _textControllerAmount.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(backgroundColor: Theme.of(context).colorScheme.inversePrimary, title: const Text("Mortgage Form")),
+      body: Column(mainAxisAlignment: .center, children: [
+        TextField(controller: _textControllerAmount, decoration: InputDecoration(label: const Text("Principal Amount (\$)"))),
+        Row(mainAxisAlignment: .center, children: [
+          TextButton(child: const Text("Submit"), onPressed: () => Navigator.pop(context)),
+          TextButton(child: const Text("Cancel"), onPressed: () => Navigator.pop(context)),
+        ])
+      ])
+    );
+  }
 }
 
 class _MortgagePageState extends State<MortgageHomePage> {
@@ -66,20 +96,20 @@ class _MortgagePageState extends State<MortgageHomePage> {
     }
 
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: const Text("Home"),
-      ),
-      body: Column(
-        mainAxisAlignment: .center,
-        children: infoWidgets + [
+      appBar: AppBar(backgroundColor: Theme.of(context).colorScheme.inversePrimary, title: const Text("Home")),
+      body: Column(mainAxisAlignment: .center, children: infoWidgets + [
           CheckboxListTile(title: const Text("Terms and Conditions"), value: acceptedTerms, onChanged: (bool? value) async {
             final accepted = await showTermsDialog(context: context);
             setState(() {
               acceptedTerms = accepted!;
             });
           }),
-          TextButton(child: const Text("Modify Data"), onPressed: () {
+          TextButton(child: const Text("Modify Data"), onPressed: () async {
+            final mortgage = await Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => MortgageForm()));
+            if (mortgage != null) {
+              _mortgage = mortgage;
+              return;
+            }
           }),
         ],
       ),
