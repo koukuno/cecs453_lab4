@@ -30,7 +30,7 @@ class MortgageHomePage extends StatefulWidget {
 }
 
 class _MortgagePageState extends State<MortgageHomePage> {
-  var _mortgage = Mortgage(amount: Decimal.parse("400000"), rate: Decimal.parse("0.08"), years: 30);
+  Mortgage? _mortgage;
 
   void _updateMortgage({required Decimal amount, required Decimal rate, required int years}) {
     setState(() {
@@ -40,23 +40,35 @@ class _MortgagePageState extends State<MortgageHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    List<Widget> infoWidgets = [];
+
+    if (_mortgage != null) {
+      infoWidgets.add(Text("Principal Amount: \$${_mortgage!.amount.toStringAsFixed(2)}"));
+      infoWidgets.add(Text("Rate: ${_mortgage!.rate * Decimal.parse("100.0")}%"));
+      infoWidgets.add(Text("Years: ${_mortgage!.years}"));
+      infoWidgets.add(Text("Monthly Payment: \$${_mortgage!.formatMonthlyPayment()}"));
+      infoWidgets.add(Text("Total Payment: \$${_mortgage!.formatTotalPayment()}"));
+    } else {
+      infoWidgets.add(const Text("Please set a Mortgage by tapping on Update Mortgage below"));
+    }
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: const Text("Home"),
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: .center,
-          children: [
-            Text("Principal Amount: \$${_mortgage.amount.toStringAsFixed(2)}"),
-            Text("Rate: ${_mortgage.rate * Decimal.parse("100.0")}%"),
-            Text("Years: ${_mortgage.years}"),
-            Text("Monthly Payment: \$${_mortgage.formatMonthlyPayment()}"),
-            Text("Total Payment: \$${_mortgage.formatTotalPayment()}"),
-          ],
-        ),
-      )
+      body: Column(
+        mainAxisAlignment: .center,
+        children: infoWidgets + [
+          Row(mainAxisAlignment: .center, children: [
+            Checkbox(value: false, semanticLabel: "Terms and Conditions", onChanged: (bool? value) {
+            }),
+            const Text("Terms and Conditions"),
+          ]),
+          TextButton(child: const Text("Modify Data"), onPressed: () {
+          }),
+        ],
+      ),
     );
   }
 }
