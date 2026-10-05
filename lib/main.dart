@@ -31,11 +31,24 @@ class MortgageHomePage extends StatefulWidget {
 
 class _MortgagePageState extends State<MortgageHomePage> {
   Mortgage? _mortgage;
+  bool acceptedTerms = false;
 
   void _updateMortgage({required Decimal amount, required Decimal rate, required int years}) {
     setState(() {
       _mortgage = Mortgage(amount: amount, rate: rate, years: years);
     });
+  }
+
+  Future<bool?> showTermsDialog({required BuildContext context}) async
+  {
+    return showDialog(context: context, builder: (BuildContext context) { return AlertDialog(
+      title: const Text("Alert"),
+      content: const Text("Do you agree to the Terms and Conditions?"),
+      actions: <Widget>[
+        TextButton(child: const Text("Disagree"), onPressed: () => Navigator.pop(context, false)),
+        TextButton(child: const Text("Agree"), onPressed: () => Navigator.pop(context, true)),
+      ],
+    ); });
   }
 
   @override
@@ -49,7 +62,7 @@ class _MortgagePageState extends State<MortgageHomePage> {
       infoWidgets.add(Text("Monthly Payment: \$${_mortgage!.formatMonthlyPayment()}"));
       infoWidgets.add(Text("Total Payment: \$${_mortgage!.formatTotalPayment()}"));
     } else {
-      infoWidgets.add(const Text("Please set a Mortgage by tapping on Update Mortgage below"));
+      infoWidgets.add(const Text("Please set a Mortgage by tapping on Modify Data below"));
     }
 
     return Scaffold(
@@ -60,11 +73,12 @@ class _MortgagePageState extends State<MortgageHomePage> {
       body: Column(
         mainAxisAlignment: .center,
         children: infoWidgets + [
-          Row(mainAxisAlignment: .center, children: [
-            Checkbox(value: false, semanticLabel: "Terms and Conditions", onChanged: (bool? value) {
-            }),
-            const Text("Terms and Conditions"),
-          ]),
+          CheckboxListTile(title: const Text("Terms and Conditions"), value: acceptedTerms, onChanged: (bool? value) async {
+            final accepted = await showTermsDialog(context: context);
+            setState(() {
+              acceptedTerms = accepted!;
+            });
+          }),
           TextButton(child: const Text("Modify Data"), onPressed: () {
           }),
         ],
